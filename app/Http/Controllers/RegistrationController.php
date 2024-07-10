@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Registration;
+use Illuminate\Http\Request;
+
+class RegistrationController extends Controller
+{
+    public function index()
+    {
+        return response()->json(Registration::all(), 200);
+    }
+
+    public function store(Request $request)
+    {
+        $registration = Registration::create($request->all());
+        return response()->json($registration, 201);
+    }
+
+    public function show(Registration $registration)
+    {
+        return $product;
+    }
+
+    public function update(Request $request, Registration $registration)
+    {
+        $registration->update($request->all());
+        return response()->json($registration, 200);
+    }
+
+    public function destroy(Registration $registration)
+    {
+        $registration->delete();
+        return response()->json(null,204);
+}
+}
