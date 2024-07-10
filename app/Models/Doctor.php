@@ -10,7 +10,7 @@ class Doctor extends Model
     use HasFactory;
     protected $fillable = ['poli_id', 'name', 'email', 'password', ];
 
-    public function poli(): BelongsTo
+    public function poli()
     {
         return $this->BelongsTo(Poli::class, 'poli_id');
     }

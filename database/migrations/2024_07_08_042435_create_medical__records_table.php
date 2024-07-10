@@ -16,6 +16,7 @@ return new class extends Migration
             $table->timestamps();
             $table->unsignedBigInteger('patient_id');
             $table->unsignedBigInteger('doctor_id');
+            $table->unsignedBigInteger('registration_id');
             $table->date('date');
             $table->text('symptomps');
             $table->text('diagnosis');

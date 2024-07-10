@@ -14,19 +14,17 @@ return new class extends Migration
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->unsignedBigInteger('registration_id');
-            $table->unsignedBigInteger('medical_record_id');
+            $table->unsignedBigInteger('user_id');
+            $table->string('email');
             $table->string('name');
             $table->string('phone');
             $table->string('gender');
             $table->date('birth');
             $table->string('address');
-            $table->string('status');
             $table->string('religion');
             $table->string('nik');
             $table->string('kk');
             $table->string('blood_type');
-            $table->string('parents');
             $table->text('password');
         });
     }

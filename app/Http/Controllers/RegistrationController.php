@@ -9,7 +9,8 @@ class RegistrationController extends Controller
 {
     public function index()
     {
-        return response()->json(Registration::all(), 200);
+        $registrations = Registration::with(['patient', 'doctor.poli'])->get();
+        return response()->json($registrations, 200);
     }
 
     public function store(Request $request)
