@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Doctor extends Model
 {
     use HasFactory;
-    protected $fillable = ['poli_id', 'name', 'email', 'password', ];
+    protected $fillable = ['poli_id', 'name', 'user_id', 'specialty', 'about', 'education', 'actions'];
 
     public function poli()
     {
@@ -21,5 +21,9 @@ class Doctor extends Model
     public function registrations()
     {
         return $this->hasMany(Registration::class);
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

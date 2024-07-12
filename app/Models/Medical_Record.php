@@ -18,4 +18,8 @@ class Medical_Record extends Model
     {
         return $this->belongsTo(Doctor::class, 'doctor_id');
     }
+    public function registration()
+    {
+        return $this->belongsTo(Registration::class);
+    }
 }

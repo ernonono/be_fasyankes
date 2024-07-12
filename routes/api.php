@@ -21,6 +21,7 @@ use App\Http\Controllers\AuthController;
 */
 
 Route::post('register', [AuthController::class, 'register']);
+Route::post('register-doctor', [AuthController::class, 'registerDoctor']);
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
@@ -30,4 +31,8 @@ Route::middleware(['auth:sanctum', 'role:patient'])->group(function () {
     Route::apiResource('medical_record', MedicalRecordController::class);
     Route::apiResource('patients', PatientController::class);
     Route::apiResource('registrations', RegistrationController::class);
+});
+
+Route::middleware(['auth:sanctum', 'role:doctor'])->group(function () {
+    Route::get('registrations-doctor', [RegistrationController::class, 'getRegistrationByDoctor']);
 });

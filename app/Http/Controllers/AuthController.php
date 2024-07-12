@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Doctor;
 use App\Models\User;
 use App\Models\Patient;
 use Illuminate\Http\Request;
@@ -58,6 +59,45 @@ class AuthController extends Controller
         return response()->json(['message' => 'User registered successfully'], 201);
     }
 
+    public function registerDoctor(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'poli_id' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'doctor',
+        ]);
+
+        $doctor = Doctor::create([
+            'name' => $request->name,
+            'poli_id' => $request->poli_id,
+            'user_id' => $user->id,
+            'specialty' => $request->specialty,
+            'about' => $request->about,
+            'education' => json_encode($request->education),
+            'work_experience' => json_encode($request->work_experience),
+            'actions' => json_encode($request->actions),
+        ]);
+
+        // update user
+        $updatedUser = User::find($user->id);
+        $updatedUser->doctor_id = $doctor->id;
+        $updatedUser->save();
+
+        return response()->json(['message' => 'Doctor registered successfully'], 201);
+    }
+
     public function login(Request $request)
     {
         $request->validate([
@@ -65,7 +105,7 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::with('patient')->where('email', $request->email)->first();
 
         if (!$user) {
             return response()->json(['message' => 'There is no user found with the matching email'], 401);
@@ -76,6 +116,17 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        if ($user->role == 'doctor') {
+            $doctor = User::with('doctor')->where('id', $user->id)->first();
+            $doctor->doctor->actions = json_decode($doctor->doctor->actions);
+            $doctor->doctor->education = json_decode($doctor->doctor->education);
+            return response()->json([
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'user' => $doctor,
+            ]);
+        }
 
         return response()->json([
             'access_token' => $token,

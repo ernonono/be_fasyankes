@@ -16,7 +16,7 @@ return new class extends Migration
             $table->timestamps();
             $table->unsignedBigInteger('patient_id');
             $table->unsignedBigInteger('doctor_id');
-            $table->date('appointment_date');
+            $table->dateTime('appointment_date');
             $table->string('payment_type');
             $table->date('registry_date');
             $table->text('description');

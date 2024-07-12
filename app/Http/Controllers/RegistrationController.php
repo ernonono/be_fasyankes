@@ -7,8 +7,15 @@ use Illuminate\Http\Request;
 
 class RegistrationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $user = $request->user();
+
+        if ($user->role == 'patient') {
+            $registrations = Registration::with(['patient', 'doctor.poli'])->where('patient_id', $user->patient_id)->get();
+            return response()->json($registrations, 200);
+        }
+
         $registrations = Registration::with(['patient', 'doctor.poli'])->get();
         return response()->json($registrations, 200);
     }
@@ -34,5 +41,12 @@ class RegistrationController extends Controller
     {
         $registration->delete();
         return response()->json(null, 204);
+    }
+
+    public function getRegistrationByDoctor(Request $request)
+    {
+        $user = $request->user();
+        $registrations = Registration::with(['patient', 'doctor.poli'])->where('doctor_id', $user->doctor_id)->get();
+        return response()->json($registrations, 200);
     }
 }
