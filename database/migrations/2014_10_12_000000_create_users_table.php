@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('patient_id');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('role')->default('patient');
             $table->rememberToken();
             $table->timestamps();
         });

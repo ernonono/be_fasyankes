@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->unsignedBigInteger('user_id');
-            $table->string('email');
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->string('name');
             $table->string('phone');
             $table->string('gender');
@@ -25,7 +24,6 @@ return new class extends Migration
             $table->string('nik');
             $table->string('kk');
             $table->string('blood_type');
-            $table->text('password');
         });
     }
 

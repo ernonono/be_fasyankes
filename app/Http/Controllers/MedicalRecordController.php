@@ -2,36 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MedicalRecord;
+use App\Models\Medical_Record;
 use Illuminate\Http\Request;
 
 class MedicalRecordController extends Controller
 {
     public function index()
     {
-        return response()->json(MedicalRecord::all(), 200);
+        return response()->json(Medical_Record::all(), 200);
     }
 
     public function store(Request $request)
     {
-        $medicalrecord = MedicalRecord::create($request->all());
-        return response()->json($poli, 201);
+        $medicalrecord = Medical_Record::create($request->all());
+        return response()->json($medicalrecord, 201);
     }
 
-    public function show(MedicalRecord $medicalrecord)
+    public function show(Medical_Record $medicalrecord)
     {
-        return $product;
+        return $medicalrecord;
     }
 
-    public function update(Request $request, MEdicalRecord $medicalrecord)
+    public function update(Request $request, Medical_Record $medicalrecord)
     {
         $medicalrecord->update($request->all());
         return response()->json($medicalrecord, 200);
     }
 
-    public function destroy(MedicalRecord $medicalrecord)
+    public function destroy(Medical_Record $medicalrecord)
     {
         $medicalrecord->delete();
-        return response()->json(null,204);
-}
+        return response()->json(null, 204);
+    }
 }

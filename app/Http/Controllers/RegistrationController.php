@@ -21,7 +21,7 @@ class RegistrationController extends Controller
 
     public function show(Registration $registration)
     {
-        return $product;
+        return $registration;
     }
 
     public function update(Request $request, Registration $registration)
@@ -33,6 +33,6 @@ class RegistrationController extends Controller
     public function destroy(Registration $registration)
     {
         $registration->delete();
-        return response()->json(null,204);
-}
+        return response()->json(null, 204);
+    }
 }

@@ -10,12 +10,12 @@ class Medical_Record extends Model
     use HasFactory;
     protected $fillable = ['patient_id', 'doctor_id', 'date', 'symptomps', 'diagnosis', 'prescription'];
 
-    public function user(): BelongsTo
+    public function user()
     {
-        return $this->BelongsTo(User::class, 'patient_id');
+        return $this->belongsTo(User::class, 'patient_id');
     }
-    public function doctor(): BelongTo
+    public function doctor()
     {
-        return $this->BelongsTo(Doctor::class, 'doctor_id');
+        return $this->belongsTo(Doctor::class, 'doctor_id');
     }
 }
