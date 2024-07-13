@@ -44,7 +44,17 @@ class MedicalRecordController extends Controller
 
     public function destroy(MedicalRecord $medicalrecord)
     {
+        // update status registration if there is no medical record
+        $registration = Registration::find($medicalrecord->registration_id);
+        $medicalrecords = MedicalRecord::where('registration_id', $medicalrecord->registration_id)->get();
+
+        if ($medicalrecords->count() == 1) { // if there is only one medical record
+            $registration->status = 'Belum Selesai';
+            $registration->save();
+        }
+
         $medicalrecord->delete();
+
         return response()->json(null, 204);
     }
 }
