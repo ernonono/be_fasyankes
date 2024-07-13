@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Registration extends Model
+class MedicalRecord extends Model
 {
     use HasFactory;
-    protected $fillable = ['patient_id', 'doctor_id', 'doctor', 'registry_date', 'is_canceled', 'appointment_date', 'payment_type', 'status', 'description'];
+    protected $fillable = ['patient_id', 'doctor_id', 'date', 'symptomps', 'diagnosis', 'prescription', 'registration_id'];
 
     public function patient()
     {
@@ -18,8 +18,8 @@ class Registration extends Model
     {
         return $this->belongsTo(Doctor::class, 'doctor_id');
     }
-    public function medical_records()
+    public function registration()
     {
-        return $this->hasMany(MedicalRecord::class);
+        return $this->belongsTo(Registration::class, 'registration_id');
     }
 }

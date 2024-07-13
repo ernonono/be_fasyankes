@@ -2,34 +2,47 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Medical_Record;
+use App\Models\MedicalRecord;
+use App\Models\Registration;
 use Illuminate\Http\Request;
 
 class MedicalRecordController extends Controller
 {
     public function index()
     {
-        return response()->json(Medical_Record::all(), 200);
+        return response()->json(MedicalRecord::all(), 200);
     }
 
     public function store(Request $request)
     {
-        $medicalrecord = Medical_Record::create($request->all());
+        $registration = Registration::find($request->registration_id);
+        if (!$registration) {
+            return response()->json(['message' => 'Registration not found'], 404);
+        }
+
+
+        $medicalrecord = MedicalRecord::create($request->all());
+
+        // update status registration
+        $registration->status = 'Selesai';
+        $registration->save();
+
         return response()->json($medicalrecord, 201);
     }
 
-    public function show(Medical_Record $medicalrecord)
+    public function show(MedicalRecord $medicalrecord)
     {
-        return $medicalrecord;
+        $data = MedicalRecord::with(['patient', 'doctor.poli', 'registration'])->find($medicalrecord->id);
+        return response()->json($data, 200);
     }
 
-    public function update(Request $request, Medical_Record $medicalrecord)
+    public function update(Request $request, MedicalRecord $medicalrecord)
     {
         $medicalrecord->update($request->all());
         return response()->json($medicalrecord, 200);
     }
 
-    public function destroy(Medical_Record $medicalrecord)
+    public function destroy(MedicalRecord $medicalrecord)
     {
         $medicalrecord->delete();
         return response()->json(null, 204);

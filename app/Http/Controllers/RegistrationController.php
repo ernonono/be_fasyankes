@@ -46,7 +46,14 @@ class RegistrationController extends Controller
     public function getRegistrationByDoctor(Request $request)
     {
         $user = $request->user();
-        $registrations = Registration::with(['patient', 'doctor.poli'])->where('doctor_id', $user->doctor_id)->get();
+        $registrations = Registration::with(['patient', 'doctor.poli', 'medical_records'])->where('doctor_id', $user->doctor_id)->get();
         return response()->json($registrations, 200);
+    }
+
+    public function getDetailRegistrationByDoctor(Request $request, Registration $registration)
+    {
+        $user = $request->user();
+        $data = Registration::with(['patient', 'doctor.poli'])->where('doctor_id', $user->doctor_id)->where('id', $registration->id)->first();
+        return response()->json($data, 200);
     }
 }

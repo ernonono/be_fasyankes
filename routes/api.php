@@ -28,11 +28,17 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanct
 Route::middleware(['auth:sanctum', 'role:patient'])->group(function () {
     Route::apiResource('polis', PoliController::class);
     Route::apiResource('dokters', DoctorController::class);
-    Route::apiResource('medical_record', MedicalRecordController::class);
     Route::apiResource('patients', PatientController::class);
     Route::apiResource('registrations', RegistrationController::class);
 });
 
 Route::middleware(['auth:sanctum', 'role:doctor'])->group(function () {
+    Route::get('registrations-doctor/{registration}', [RegistrationController::class, 'getDetailRegistrationByDoctor']);
     Route::get('registrations-doctor', [RegistrationController::class, 'getRegistrationByDoctor']);
+
+    Route::post('medical-records', [MedicalRecordController::class, 'store']);
+    Route::delete('medical-records/{medicalrecord}', [MedicalRecordController::class, 'destroy']);
+    Route::put('medical-records/{medicalrecord}', [MedicalRecordController::class, 'update']);
+    Route::get('medical-records', [MedicalRecordController::class, 'index']);
+    Route::get('medical-records/{medicalrecord}', [MedicalRecordController::class, 'show']);
 });
