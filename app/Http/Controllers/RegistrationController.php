@@ -12,7 +12,7 @@ class RegistrationController extends Controller
         $user = $request->user();
 
         if ($user->role == 'patient') {
-            $registrations = Registration::with(['patient', 'doctor.poli'])->where('patient_id', $user->patient_id)->get();
+            $registrations = Registration::with(['patient', 'doctor.poli', 'medical_records'])->where('patient_id', $user->patient_id)->get();
             return response()->json($registrations, 200);
         }
 
