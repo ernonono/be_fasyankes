@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
 class Doctor extends Model
 {
     use HasFactory;
-    protected $fillable = ['poli_id', 'name', 'user_id', 'specialty', 'about', 'education', 'actions'];
+    protected $fillable = ['poli_id', 'name', 'user_id', 'specialty', 'about', 'education', 'actions', 'image', 'nik', 'birthdate', 'gender', 'address', 'phone_number', 'hospital_code', 'profession', 'unique_number', 'facebook_link', 'twitter_link', 'google_plus_link', 'linkedin_link'];
 
     public function poli()
     {
@@ -16,7 +17,7 @@ class Doctor extends Model
     }
     public function medical_records()
     {
-        return $this->hasMany(Medical_record::class);
+        return $this->hasMany(MedicalRecord::class);
     }
     public function registrations()
     {

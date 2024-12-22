@@ -3,6 +3,8 @@
 /public/build
 /public/hot
 /public/storage
+/public/doctor_image/*.jpg
+/public/patient_image/*.jpg
 /storage/*.key
 /vendor
 .env

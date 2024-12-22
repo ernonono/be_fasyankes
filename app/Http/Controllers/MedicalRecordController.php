@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MedicalRecord;
+use App\Models\Patient;
 use App\Models\Registration;
 use Illuminate\Http\Request;
 
@@ -33,6 +34,12 @@ class MedicalRecordController extends Controller
     public function show(MedicalRecord $medicalrecord)
     {
         $data = MedicalRecord::with(['patient', 'doctor.poli', 'registration'])->find($medicalrecord->id);
+        return response()->json($data, 200);
+    }
+
+    public function getMedicalRecordByRegistration($registration_id)
+    {
+        $data = Registration::with(['medical_records', 'doctor.poli', 'patient.user'])->find($registration_id);
         return response()->json($data, 200);
     }
 

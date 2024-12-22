@@ -9,7 +9,8 @@ class PoliController extends Controller
 {
     public function index()
     {
-        return response()->json(Poli::all(), 200);
+        $poli = Poli::with('doctors')->get();
+        return response()->json($poli, 200);
     }
 
     public function store(Request $request)
@@ -20,7 +21,7 @@ class PoliController extends Controller
 
     public function show(Poli $poli)
     {
-        return $product;
+        return $poli;
     }
 
     public function update(Request $request, Poli $poli)
@@ -32,6 +33,6 @@ class PoliController extends Controller
     public function destroy(Poli $poli)
     {
         $poli->delete();
-        return response()->json(null,204);
-}
+        return response()->json(null, 204);
+    }
 }

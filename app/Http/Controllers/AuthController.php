@@ -128,6 +128,8 @@ class AuthController extends Controller
             ]);
         }
 
+        Auth::login($user); // login the user
+
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',

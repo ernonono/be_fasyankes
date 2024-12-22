@@ -8,7 +8,25 @@ use Illuminate\Database\Eloquent\Model;
 class Patient extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'phone', 'gender', 'birth', 'address', 'religion', 'nik', 'kk', 'blood_type', 'user_id'];
+    protected $fillable = [
+        'name',
+        'phone',
+        'gender',
+        'birth',
+        'address',
+        'religion',
+        'nik',
+        'kk',
+        'blood_type',
+        'user_id',
+        'image',
+        'status',
+        'father_name',
+        'mother_name',
+        'related_contact',
+        'bpjs'
+
+    ];
 
     public function registration()
     {
@@ -16,7 +34,7 @@ class Patient extends Model
     }
     public function medicalrecord()
     {
-        return $this->hasMany(Medical_Record::class);
+        return $this->hasMany(MedicalRecord::class);
     }
     public function user()
     {
