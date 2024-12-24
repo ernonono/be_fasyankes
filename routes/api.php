@@ -7,6 +7,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\HealthcareController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('registrations', [RegistrationController::class, 'store']);
     Route::get('registrations', [RegistrationController::class, 'index']);
     Route::get('registrations/{registration}', [RegistrationController::class, 'show']);
+
+    Route::get('healthcares', [HealthcareController::class, 'index']);
+    Route::get('healthcares/{healthcare}', [HealthcareController::class, 'show']);
 });
 
 Route::middleware(['auth:sanctum', 'role:doctor'])->group(function () {
@@ -76,4 +80,9 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('medical-records/registration/{registration_id}', [MedicalRecordController::class, 'getMedicalRecordByRegistration']);
 
     Route::delete('registrations/{registration}', [RegistrationController::class, 'destroy']);
+
+    Route::post('healthcares', [HealthcareController::class, 'store']);
+    Route::put('healthcares/{healthcare}', [HealthcareController::class, 'update']);
+    Route::delete('healthcares/{healthcare}', [HealthcareController::class, 'destroy']);
+    Route::post('healthcares/upload-video', [HealthcareController::class, 'uploadVideo']);
 });
