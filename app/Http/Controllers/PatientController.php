@@ -9,7 +9,17 @@ class PatientController extends Controller
 {
     public function index()
     {
-        $data = Patient::with('user')->get();
+        $name = request()->query('name');
+
+        $data = Patient::with('user')
+            ->when($name, function ($query) use ($name) {
+                return $query->whereHas('user', function ($query) use ($name) {
+                    return $query->where('name', 'like', "%$name%");
+                });
+            })
+            ->get();
+
+
         return response()->json($data, 200);
     }
 

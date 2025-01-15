@@ -41,7 +41,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('registrations', [RegistrationController::class, 'store']);
     Route::get('registrations', [RegistrationController::class, 'index']);
+    Route::get('registrations-agenda', [RegistrationController::class, 'indexAgenda']);
     Route::get('registrations/{registration}', [RegistrationController::class, 'show']);
+    Route::get('registrations-doctor-agenda/{dokter_id}', [RegistrationController::class, 'getRegistrationByDoctorAgendaById']);
 
     Route::get('healthcares', [HealthcareController::class, 'index']);
     Route::get('healthcares/{healthcare}', [HealthcareController::class, 'show']);
@@ -51,6 +53,7 @@ Route::middleware(['auth:sanctum', 'role:doctor'])->group(function () {
     Route::get('registrations-doctor/{registration}', [RegistrationController::class, 'getDetailRegistrationByDoctor']);
 
     Route::get('registrations-doctor', [RegistrationController::class, 'getRegistrationByDoctor']);
+    Route::get('registrations-doctor-agenda', [RegistrationController::class, 'getRegistrationByDoctorAgenda']);
 
     Route::post('medical-records', [MedicalRecordController::class, 'store']);
 

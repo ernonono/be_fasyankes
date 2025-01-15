@@ -11,10 +11,19 @@ class DoctorController extends Controller
     public function index(Request $request)
     {
         $poli_id = $request->query('poli_id');
+        $name = $request->query('name');
+        $specialty = $request->query('specialty');
 
         $dokters = Doctor::when($poli_id, function ($query, $poli_id) {
             return $query->where('poli_id', '=', $poli_id);
-        })->with(['poli', 'user'])->get();
+        })
+            ->when($name, function ($query, $name) {
+                return $query->where('name', 'like', "%$name%");
+            })
+            ->when($specialty, function ($query, $specialty) {
+                return $query->where('specialty', 'like', "%$specialty%");
+            })
+            ->with(['poli', 'user'])->get();
 
         return response()->json($dokters, 200);
     }
@@ -149,6 +158,11 @@ class DoctorController extends Controller
 
     public function destroy(Doctor $doctor)
     {
+        // check if Registration with the doctor exists
+        if ($doctor->registrations()->exists()) {
+            return response()->json(['message' => 'Doctor has registrations'], 400);
+        }
+
         $doctor->delete();
         return response()->json(null, 204);
     }

@@ -9,7 +9,18 @@ class PoliController extends Controller
 {
     public function index()
     {
-        $poli = Poli::with('doctors')->get();
+        $name = request()->query('name');
+        $location = request()->query('location');
+
+        $poli = Poli::with('doctors')
+            ->when($name, function ($query) use ($name) {
+                return $query->where('name', 'like', "%$name%");
+            })
+            ->when($location, function ($query) use ($location) {
+                return $query->where('location', 'like', "%$location%");
+            })
+            ->get();
+
         return response()->json($poli, 200);
     }
 
