@@ -26,7 +26,9 @@ Route::post('login', [AuthController::class, 'login']);
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('user', [AuthController::class, 'user']);
+    Route::get('users', [AuthController::class, 'user']);
+    Route::get('users/me', [AuthController::class, 'me']);
+    Route::put('users/update-profile', [AuthController::class, 'updateProfile']);
 
     Route::post('logout', [AuthController::class, 'logout']);
 
@@ -38,6 +40,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('patients', [PatientController::class, 'index']);
     Route::get('patients/{patient}', [PatientController::class, 'show']);
+    Route::post('patients/upload-image', [PatientController::class, 'uploadImage']);
 
     Route::post('registrations', [RegistrationController::class, 'store']);
     Route::get('registrations', [RegistrationController::class, 'index']);
@@ -78,7 +81,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 
     Route::apiResource('patients', PatientController::class, ['except' => ['update']]);
     Route::put('patients/{patient}', [PatientController::class, 'update']);
-    Route::post('patients/upload-image', [PatientController::class, 'uploadImage']);
 
     Route::get('medical-records/registration/{registration_id}', [MedicalRecordController::class, 'getMedicalRecordByRegistration']);
 

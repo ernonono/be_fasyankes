@@ -19,14 +19,6 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'address' => 'required|string|max:255',
-            'phone' => 'required|string|max:255',
-            'birth' => 'required|date',
-            'blood_type' => 'required|string|max:255',
-            'gender' => 'required|string|max:255',
-            'religion' => 'required|string|max:255',
-            'nik' => 'required|string|max:255',
-            'kk' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -35,14 +27,14 @@ class AuthController extends Controller
 
         $patient = Patient::create([
             'name' => $request->name,
-            'phone' => $request->phone,
-            'gender' => $request->gender,
+            'phone' => '',
+            'gender' => '',
             'birth' => $request->birth,
-            'address' => $request->address,
-            'religion' => $request->religion,
-            'nik' => $request->nik,
-            'kk' => $request->kk,
-            'blood_type' => $request->blood_type,
+            'address' => '',
+            'religion' => '',
+            'nik' => '',
+            'kk' => '',
+            'blood_type' => '',
         ]);
 
         $user = User::create([
@@ -118,7 +110,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         if ($user->role == 'doctor') {
-            $doctor = User::with('doctor')->where('id', $user->id)->first();
+            $doctor = User::with('doctor.poli')->where('id', $user->id)->first();
             $doctor->doctor->actions = json_decode($doctor->doctor->actions);
             $doctor->doctor->education = json_decode($doctor->doctor->education);
             return response()->json([
@@ -142,5 +134,83 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Successfully logged out']);
+    }
+
+    public function me(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->role == 'doctor') {
+            $doctor = User::with('doctor.poli')->where('id', $user->id)->first();
+            $doctor->doctor->actions = json_decode($doctor->doctor->actions);
+            $doctor->doctor->education = json_decode($doctor->doctor->education);
+            return response()->json($doctor);
+        }
+
+        if ($user->role == 'patient') {
+            $patient = User::with('patient')->where('id', $user->id)->first();
+            return response()->json($patient);
+        }
+
+        return response()->json($user);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->role == 'doctor') {
+            $doctor = Doctor::where('user_id', $user->id)->first();
+            $doctor->name = $request->name;
+            $doctor->nik = $request->nik;
+            $doctor->birthdate = $request->birthdate;
+            $doctor->gender = $request->gender;
+            $doctor->address = $request->address;
+            $doctor->phone_number = $request->phone_number;
+            $doctor->poli_id = $request->poli_id;
+            $doctor->profession = $request->profession;
+            $doctor->about = $request->about;
+            $doctor->specialty = $request->specialty;
+            $doctor->specialty_description = $request->specialty_description;
+            $doctor->facebook_link = $request->facebook_link;
+            $doctor->twitter_link = $request->twitter_link;
+            $doctor->google_plus_link = $request->google_plus_link;
+            $doctor->linkedin_link = $request->linkedin_link;
+            $doctor->education = json_encode($request->education);
+            $doctor->actions = json_encode($request->actions);
+            $doctor->save();
+
+            $user->name = $request->name;
+            $user->email = $request->email;
+
+            $user->password = Hash::make($request->password);
+            $user->save();
+
+            $updatedDoctor = Doctor::where('user_id', $user->id)->first();
+            $updatedDoctor->actions = json_decode($updatedDoctor->actions);
+            $updatedDoctor->education = json_decode($updatedDoctor->education);
+            return response()->json($updatedDoctor);
+        }
+
+        $patient = Patient::find($user->patient_id);
+        $patient->name = $request->name;
+        $patient->phone = $request->phone;
+        $patient->gender = $request->gender;
+        $patient->birth = $request->birth;
+        $patient->address = $request->address;
+        $patient->religion = $request->religion;
+        $patient->nik = $request->nik;
+        $patient->kk = $request->kk;
+        $patient->bpjs = $request->bpjs;
+        $patient->blood_type = $request->blood_type;
+        $patient->save();
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->save();
+
+        $updatedUser = User::with('patient')->where('id', $user->id)->first();
+
+        return response()->json($updatedUser);
     }
 }
