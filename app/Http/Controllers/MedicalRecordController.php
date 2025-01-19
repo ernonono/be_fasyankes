@@ -16,13 +16,23 @@ class MedicalRecordController extends Controller
 
     public function store(Request $request)
     {
+        $data = $request->all();
+
         $registration = Registration::find($request->registration_id);
         if (!$registration) {
             return response()->json(['message' => 'Registration not found'], 404);
         }
 
+        // get latest medical record with the same 'rm_number' format = 'RMYYMMXXXXX'
+        $latestMedicalRecord = MedicalRecord::where('rm_number', 'like', 'RM' . date('ym') . '%')->latest()->first();
+        $rm_number = 'RM' . date('ym') . '00001';
+        if ($latestMedicalRecord) {
+            $rm_number = 'RM' . date('ym') . str_pad((int)substr($latestMedicalRecord->rm_number, 6) + 1, 5, '0', STR_PAD_LEFT);
+        }
 
-        $medicalrecord = MedicalRecord::create($request->all());
+        $data['rm_number'] = $rm_number;
+
+        $medicalrecord = MedicalRecord::create($data);
 
         // update status registration
         $registration->status = 'Selesai';
