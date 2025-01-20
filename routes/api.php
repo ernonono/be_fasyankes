@@ -24,7 +24,7 @@ Route::post('register', [AuthController::class, 'register']);
 
 Route::post('login', [AuthController::class, 'login']);
 
-
+// middleware untuk cek apakah user sudah login atau belum
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('users', [AuthController::class, 'user']);
     Route::get('users/me', [AuthController::class, 'me']);
@@ -52,6 +52,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('healthcares/{healthcare}', [HealthcareController::class, 'show']);
 });
 
+// middleware untuk cek apakah user sudah login dan memiliki role sebagai dokter
 Route::middleware(['auth:sanctum', 'role:doctor'])->group(function () {
     Route::get('registrations-doctor/{registration}', [RegistrationController::class, 'getDetailRegistrationByDoctor']);
 
@@ -69,6 +70,7 @@ Route::middleware(['auth:sanctum', 'role:doctor'])->group(function () {
     Route::get('medical-records/{medicalrecord}', [MedicalRecordController::class, 'show']);
 });
 
+// middleware untuk cek apakah user sudah login dan memiliki role sebagai admin
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::post('polis', [PoliController::class, 'store']);
     Route::put('polis/{poli}', [PoliController::class, 'update']);
