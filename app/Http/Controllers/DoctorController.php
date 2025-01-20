@@ -78,6 +78,9 @@ class DoctorController extends Controller
             return response()->json(['message' => 'Doctor not found'], 404);
         }
 
+        $doctor->education = json_decode($doctor->education);
+        $doctor->actions = json_decode($doctor->actions);
+
         // Return the doctor's details
         return response()->json($doctor, 200);
     }

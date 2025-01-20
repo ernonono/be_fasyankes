@@ -133,4 +133,37 @@ class RegistrationController extends Controller
         $data = Registration::with(['patient', 'doctor.poli'])->where('doctor_id', $user->doctor_id)->where('id', $registration->id)->first();
         return response()->json($data, 200);
     }
+
+    public function getRegistrationQuotaByHour(Request $request)
+    {
+        $doctor_id = $request->query('doctor_id');
+        $date = $request->query('date');
+
+        $quota_08 = 10;
+        $quota_10 = 10;
+        $quota_13 = 10;
+        $quota_15 = 10;
+
+        $date_08 = $date . ' 08:00:00';
+        $date_10 = $date . ' 10:00:00';
+        $date_13 = $date . ' 13:00:00';
+        $date_15 = $date . ' 15:00:00';
+
+        $registrations_08 = Registration::where('doctor_id', $doctor_id)->where('appointment_date', $date_08)->count();
+        $registrations_10 = Registration::where('doctor_id', $doctor_id)->where('appointment_date', $date_10)->count();
+        $registrations_13 = Registration::where('doctor_id', $doctor_id)->where('appointment_date', $date_13)->count();
+        $registrations_15 = Registration::where('doctor_id', $doctor_id)->where('appointment_date', $date_15)->count();
+
+        $quota_08 = $quota_08 - $registrations_08;
+        $quota_10 = $quota_10 - $registrations_10;
+        $quota_13 = $quota_13 - $registrations_13;
+        $quota_15 = $quota_15 - $registrations_15;
+
+        return response()->json([
+            8 => $quota_08,
+            10 => $quota_10,
+            13 => $quota_13,
+            15 => $quota_15,
+        ], 200);
+    }
 }

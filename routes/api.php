@@ -47,6 +47,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('registrations-agenda', [RegistrationController::class, 'indexAgenda']);
     Route::get('registrations/{registration}', [RegistrationController::class, 'show']);
     Route::get('registrations-doctor-agenda/{dokter_id}', [RegistrationController::class, 'getRegistrationByDoctorAgendaById']);
+    Route::get('registrations-quota', [RegistrationController::class, 'getRegistrationQuotaByHour']);
 
     Route::get('healthcares', [HealthcareController::class, 'index']);
     Route::get('healthcares/{healthcare}', [HealthcareController::class, 'show']);
