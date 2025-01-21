@@ -7,6 +7,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HealthcareController;
 
 /*
@@ -23,6 +24,9 @@ use App\Http\Controllers\HealthcareController;
 Route::post('register', [AuthController::class, 'register']);
 
 Route::post('login', [AuthController::class, 'login']);
+
+Route::post('send-reset-password', [AuthController::class, 'sendEmailResetPassword']);
+Route::post('reset-password', [AuthController::class, 'resetPassword']);
 
 // middleware untuk cek apakah user sudah login atau belum
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -73,6 +77,9 @@ Route::middleware(['auth:sanctum', 'role:doctor'])->group(function () {
 
 // middleware untuk cek apakah user sudah login dan memiliki role sebagai admin
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    Route::get('dashboard/card', [DashboardController::class, 'getCardData']);
+    Route::get('dashboard/chart', [DashboardController::class, 'getChartData']);
+
     Route::post('polis', [PoliController::class, 'store']);
     Route::put('polis/{poli}', [PoliController::class, 'update']);
     Route::delete('polis/{poli}', [PoliController::class, 'destroy']);
@@ -88,6 +95,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('medical-records/registration/{registration_id}', [MedicalRecordController::class, 'getMedicalRecordByRegistration']);
 
     Route::delete('registrations/{registration}', [RegistrationController::class, 'destroy']);
+
+    Route::put('toggle-active', [AuthController::class, 'toggleIsActive']);
 
     Route::post('healthcares', [HealthcareController::class, 'store']);
     Route::put('healthcares/{healthcare}', [HealthcareController::class, 'update']);

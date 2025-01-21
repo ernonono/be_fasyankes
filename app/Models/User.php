@@ -23,7 +23,9 @@ class User extends Authenticatable
         'doctor_id',
         'email',
         'password',
-        'role'
+        'role',
+        'remember_token',
+        'is_active'
     ];
 
     /**
@@ -33,7 +35,6 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
     /**

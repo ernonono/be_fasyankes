@@ -39,6 +39,9 @@ class RegistrationController extends Controller
                 return $query->whereDate('appointment_date', '<=', $end_date);
             })
             ->where('type', 'appointment')
+            // sort by appointment date
+            ->orderBy('appointment_date', 'asc')
+
             ->get();
 
         return response()->json($registrations, 200);

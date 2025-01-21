@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SendResetPasswordMail;
 use App\Models\Doctor;
 use App\Models\User;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
@@ -105,6 +107,10 @@ class AuthController extends Controller
 
         if (!Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
+        }
+
+        if (!$user->is_active) {
+            return response()->json(['message' => 'User is not active'], 401);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -212,5 +218,53 @@ class AuthController extends Controller
         $updatedUser = User::with('patient')->where('id', $user->id)->first();
 
         return response()->json($updatedUser);
+    }
+
+    public function sendEmailResetPassword(Request $request)
+    {
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'There is no user found with the matching email'], 404);
+        }
+
+        // send email here
+        Mail::to($user->email)->send(new SendResetPasswordMail($user->email));
+
+        return response()->json(['message' => 'Email sent']);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $user = User::where('email', $request->email)->first();
+        $token = $request->token;
+
+        if (!$user) {
+            return response()->json(['message' => 'There is no user found with the matching email'], 404);
+        }
+
+        if ($user->remember_token != $token) {
+            return response()->json(['message' => 'Invalid token'], 401);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->remember_token = null;
+        $user->save();
+
+        return response()->json(['message' => 'Password reset successfully']);
+    }
+
+    public function toggleIsActive(Request $request)
+    {
+        $user = User::find($request->user_id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $user->is_active = !$user->is_active;
+        $user->save();
+
+        return response()->json($user);
     }
 }
