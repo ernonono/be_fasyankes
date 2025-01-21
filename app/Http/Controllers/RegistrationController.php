@@ -108,7 +108,24 @@ class RegistrationController extends Controller
     public function getRegistrationByDoctor(Request $request)
     {
         $user = $request->user();
-        $registrations = Registration::with(['patient', 'doctor.poli', 'medical_records'])->where('doctor_id', $user->doctor_id)->where('type', 'appointment')->get();
+
+        $patient_name = $request->query('patient_name');
+        $start_date = $request->query('start_date');
+        $end_date = $request->query('end_date');
+
+        $registrations = Registration::with(['patient', 'doctor.poli', 'medical_records'])->where('doctor_id', $user->doctor_id)->where('type', 'appointment')
+            ->when($patient_name, function ($query) use ($patient_name) {
+                return $query->whereHas('patient', function ($query) use ($patient_name) {
+                    return $query->where('name', 'like', "%$patient_name%");
+                });
+            })
+            ->when($start_date, function ($query) use ($start_date) {
+                return $query->whereDate('appointment_date', '>=', $start_date);
+            })
+            ->when($end_date, function ($query) use ($end_date) {
+                return $query->whereDate('appointment_date', '<=', $end_date);
+            })
+            ->get();
         return response()->json($registrations, 200);
     }
     public function getRegistrationByDoctorAgenda(Request $request)
