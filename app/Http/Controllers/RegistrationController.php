@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Doctor;
 use App\Models\Registration;
 use Illuminate\Http\Request;
 
@@ -159,10 +160,13 @@ class RegistrationController extends Controller
         $doctor_id = $request->query('doctor_id');
         $date = $request->query('date');
 
-        $quota_08 = 10;
-        $quota_10 = 10;
-        $quota_13 = 10;
-        $quota_15 = 10;
+        $doctor = Doctor::find($doctor_id);
+        $doctor_quota = $doctor->quota;
+
+        $quota_08 = $doctor_quota;
+        $quota_10 = $doctor_quota;
+        $quota_13 = $doctor_quota;
+        $quota_15 = $doctor_quota;
 
         $date_08 = $date . ' 08:00:00';
         $date_10 = $date . ' 10:00:00';
