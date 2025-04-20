@@ -64,6 +64,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware(['auth:sanctum', 'role:doctor'])->group(function () {
     Route::get('registrations-doctor/{registration}', [RegistrationController::class, 'getDetailRegistrationByDoctor']);
 
+    Route::get('registrations-summary', [RegistrationController::class, 'getSummaryRegistrationByDoctor']);
+
     Route::get('registrations-doctor', [RegistrationController::class, 'getRegistrationByDoctor']);
     Route::get('registrations-doctor-agenda', [RegistrationController::class, 'getRegistrationByDoctorAgenda']);
 

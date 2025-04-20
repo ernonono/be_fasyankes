@@ -2,13 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ExportRegistration;
 use App\Models\Doctor;
 use App\Models\Registration;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RegistrationController extends Controller
 {
+    public function getSummaryRegistrationByDoctor(Request $request)
+    {
+        return Excel::download(new ExportRegistration(
+            $request->doctor_id,
+            $request->start_date,
+            $request->end_date
+        ), 'registrations.xlsx');
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -29,7 +39,7 @@ class RegistrationController extends Controller
                 ->where('status', 'Dibatalkan')
                 ->orderBy('created_at', 'desc')
                 ->get();
-            return response()->json(['selesai' => $registrationsSelesai, 'belum_selesai' => $registrationsBelumSelesai, 'dibatalkan' => $registrationsDibatalkan ], 200);
+            return response()->json(['selesai' => $registrationsSelesai, 'belum_selesai' => $registrationsBelumSelesai, 'dibatalkan' => $registrationsDibatalkan], 200);
         }
 
 
@@ -73,13 +83,13 @@ class RegistrationController extends Controller
             ->first();
 
         if (! $reg) {
-            return response()->json(['message'=>'Tidak dapat membatalkan pendaftaran ini.'], 400);
+            return response()->json(['message' => 'Tidak dapat membatalkan pendaftaran ini.'], 400);
         }
 
         $reg->status = 'Dibatalkan';
         $reg->save();
-        
-        return response()->json(['message'=>'Pendaftaran berhasil dibatalkan.'], 200);
+
+        return response()->json(['message' => 'Pendaftaran berhasil dibatalkan.'], 200);
     }
 
 
@@ -128,7 +138,7 @@ class RegistrationController extends Controller
             ->where('patient_id', $request->patient_id)
             ->first();
 
-        if ($existRegistration){
+        if ($existRegistration) {
             return response()->json(['error' => true, 'error_message' => 'You already have appointment at this date with the same doctor'], 400);
         }
         $registration = Registration::create($request->all());
@@ -160,7 +170,9 @@ class RegistrationController extends Controller
         $start_date = $request->query('start_date');
         $end_date = $request->query('end_date');
 
-        $registrations = Registration::with(['patient', 'doctor.poli', 'medical_records'])->where('doctor_id', $user->doctor_id)->where('type', 'appointment')
+        $registrations = Registration::with(['patient', 'doctor.poli', 'medical_records'])
+            ->where('doctor_id', $user->doctor_id)
+            ->where('type', 'appointment')
             ->when($patient_name, function ($query) use ($patient_name) {
                 return $query->whereHas('patient', function ($query) use ($patient_name) {
                     return $query->where('name', 'like', "%$patient_name%");
@@ -172,10 +184,23 @@ class RegistrationController extends Controller
             ->when($end_date, function ($query) use ($end_date) {
                 return $query->whereDate('created_at', '<=', $end_date);
             })
-            ->where('type', 'appointment')
-            // sort by appointment date
-            ->orderBy('created_at', 'desc')
+            ->orderBy('appointment_date', 'asc')
+            ->orderBy('registry_date', 'asc')
             ->get();
+
+        $previousAppointmentDate = null;
+        $queueNumber = 1;
+
+        foreach ($registrations as $registration) {
+            if ($registration->appointment_date != $previousAppointmentDate) {
+                $queueNumber = 1;
+                $previousAppointmentDate = $registration->appointment_date;
+            }
+            $registration->queue_number = $queueNumber;
+            $queueNumber++;
+        }
+
+        return response()->json($registrations, 200);
 
         return response()->json($registrations, 200);
     }
@@ -223,10 +248,10 @@ class RegistrationController extends Controller
         $date_13 = $date . ' 13:00:00';
         $date_15 = $date . ' 15:00:00';
 
-        $registrations_08 = Registration::where('doctor_id', $doctor_id)->where('appointment_date', $date_08)->count();
-        $registrations_10 = Registration::where('doctor_id', $doctor_id)->where('appointment_date', $date_10)->count();
-        $registrations_13 = Registration::where('doctor_id', $doctor_id)->where('appointment_date', $date_13)->count();
-        $registrations_15 = Registration::where('doctor_id', $doctor_id)->where('appointment_date', $date_15)->count();
+        $registrations_08 = Registration::where('doctor_id', $doctor_id)->where('appointment_date', $date_08)->where('status', '!=', 'Dibatalkan')->count();
+        $registrations_10 = Registration::where('doctor_id', $doctor_id)->where('appointment_date', $date_10)->where('status', '!=', 'Dibatalkan')->count();
+        $registrations_13 = Registration::where('doctor_id', $doctor_id)->where('appointment_date', $date_13)->where('status', '!=', 'Dibatalkan')->count();
+        $registrations_15 = Registration::where('doctor_id', $doctor_id)->where('appointment_date', $date_15)->where('status', '!=', 'Dibatalkan')->count();
 
         $quota_08 = $quota_08 - $registrations_08;
         $quota_10 = $quota_10 - $registrations_10;
