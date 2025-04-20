@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('payment_type')->nullable()->change();
             $table->string('is_canceled')->nullable()->change();
             $table->string('status')->nullable()->change();
+            $table->string('patient_id')->nullable()->change();
         });
     }
 
@@ -31,6 +32,8 @@ return new class extends Migration
             $table->string('payment_type')->nullable(false)->change();
             $table->string('is_canceled')->nullable(false)->change();
             $table->string('status')->nullable(false)->change();
+            $table->string('patient_id')->nullable(false)->change();
+
         });
     }
 };

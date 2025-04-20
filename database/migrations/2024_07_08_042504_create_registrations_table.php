@@ -21,7 +21,7 @@ return new class extends Migration
             $table->date('registry_date');
             $table->text('description');
             $table->integer('is_canceled');
-            $table->string('status');
+            $table->string('status', ['Belum Selesai', 'Selesai', 'Dibatalkan']);
         });
     }
 

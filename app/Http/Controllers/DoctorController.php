@@ -169,4 +169,5 @@ class DoctorController extends Controller
         $doctor->delete();
         return response()->json(null, 204);
     }
+    
 }

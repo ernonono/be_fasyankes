@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Quota extends Model
 {
     use HasFactory;
-    protected $fillable = ['doctor_id', 'dayIndex', 'quota', 'time'];
+    protected $fillable = ['doctor_id', 'dayIndex', 'quota', 'time', ];
 
     public function doctor()
     {

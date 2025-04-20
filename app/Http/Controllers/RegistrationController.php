@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Doctor;
 use App\Models\Registration;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class RegistrationController extends Controller
 {
@@ -13,9 +14,24 @@ class RegistrationController extends Controller
         $user = $request->user();
 
         if ($user->role == 'patient') {
-            $registrations = Registration::with(['patient.user', 'doctor.poli', 'medical_records'])->where('patient_id', $user->patient_id)->get();
-            return response()->json($registrations, 200);
+            $registrationsBelumSelesai = Registration::with(['patient.user', 'doctor.poli', 'medical_records'])
+                ->where('patient_id', $user->patient_id)
+                ->where('status', 'Belum Selesai')
+                ->orderBy('created_at', 'desc')
+                ->get();
+            $registrationsSelesai = Registration::with(['patient.user', 'doctor.poli', 'medical_records'])
+                ->where('patient_id', $user->patient_id)
+                ->where('status', 'Selesai')
+                ->orderBy('created_at', 'desc')
+                ->get();
+            $registrationsDibatalkan = Registration::with(['patient.user', 'doctor.poli', 'medical_records'])
+                ->where('patient_id', $user->patient_id)
+                ->where('status', 'Dibatalkan')
+                ->orderBy('created_at', 'desc')
+                ->get();
+            return response()->json(['selesai' => $registrationsSelesai, 'belum_selesai' => $registrationsBelumSelesai, 'dibatalkan' => $registrationsDibatalkan ], 200);
         }
+
 
         $patient_name = $request->query('patient_name');
         $poli_id = $request->query('poli_id');
@@ -34,19 +50,40 @@ class RegistrationController extends Controller
                 });
             })
             ->when($start_date, function ($query) use ($start_date) {
-                return $query->whereDate('appointment_date', '>=', $start_date);
+                return $query->whereDate('created_at', '>=', $start_date);
             })
             ->when($end_date, function ($query) use ($end_date) {
-                return $query->whereDate('appointment_date', '<=', $end_date);
+                return $query->whereDate('created_at', '<=', $end_date);
             })
             ->where('type', 'appointment')
             // sort by appointment date
-            ->orderBy('appointment_date', 'asc')
-
+            ->orderBy('created_at', 'asc')
             ->get();
 
         return response()->json($registrations, 200);
     }
+
+
+    public function cancel(Request $request, $id)
+    {
+        $user = $request->user();
+        $reg  = Registration::where('id', $id)
+            ->where('patient_id', $user->patient_id)
+            ->where('status', 'Belum Selesai')
+            ->first();
+
+        if (! $reg) {
+            return response()->json(['message'=>'Tidak dapat membatalkan pendaftaran ini.'], 400);
+        }
+
+        $reg->status = 'Dibatalkan';
+        $reg->save();
+        
+        return response()->json(['message'=>'Pendaftaran berhasil dibatalkan.'], 200);
+    }
+
+
+
     public function indexAgenda(Request $request)
     {
         $user = $request->user();
@@ -83,8 +120,17 @@ class RegistrationController extends Controller
         return response()->json($registrations, 200);
     }
 
+
     public function store(Request $request)
     {
+        $existRegistration = Registration::where('appointment_date', $request->appointment_date)
+            ->where('doctor_id', $request->doctor_id)
+            ->where('patient_id', $request->patient_id)
+            ->first();
+
+        if ($existRegistration){
+            return response()->json(['error' => true, 'error_message' => 'You already have appointment at this date with the same doctor'], 400);
+        }
         $registration = Registration::create($request->all());
         return response()->json($registration, 201);
     }
@@ -121,12 +167,16 @@ class RegistrationController extends Controller
                 });
             })
             ->when($start_date, function ($query) use ($start_date) {
-                return $query->whereDate('appointment_date', '>=', $start_date);
+                return $query->whereDate('created_at', '>=', $start_date);
             })
             ->when($end_date, function ($query) use ($end_date) {
-                return $query->whereDate('appointment_date', '<=', $end_date);
+                return $query->whereDate('created_at', '<=', $end_date);
             })
+            ->where('type', 'appointment')
+            // sort by appointment date
+            ->orderBy('created_at', 'desc')
             ->get();
+
         return response()->json($registrations, 200);
     }
     public function getRegistrationByDoctorAgenda(Request $request)

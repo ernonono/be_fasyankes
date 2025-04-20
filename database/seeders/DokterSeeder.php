@@ -15,48 +15,7 @@ class DokterSeeder extends Seeder
     {
         DB::table('doctors')->insert(
             [
-                [
-                    'name' => "Dr. Ryan Indrajaya",
-                    "email" => "ryan123@gmail.com",
-                    "password" => Hash::make("1234567890"),
-                    "poli_id" => 1
-                ],
-                [
-                    'name' => "Dr. Nadiah Hatta",
-                    "email" => "nadin123@gmail.com",
-                    "password" =>  Hash::make("1234567890"),
-                    "poli_id" => 1
-                ],
-                [
-                    'name' => "Dr. Mustika Dewi",
-                    "email" => "mustika123@gmail.com",
-                    "password" =>  Hash::make("1234567890"),
-                    "poli_id" => 1
-                ],
-                [
-                    'name' => "Dr. Yusuf Ainurrofiq",
-                    "email" => "ryan123@gmail.com",
-                    "password" =>  Hash::make("1234567890"),
-                    "poli_id" => 2
-                ],
-                [
-                    'name' => "Dr. Bariq FAwwazi",
-                    "email" => "ryan123@gmail.com",
-                    "password" =>  Hash::make("1234567890"),
-                    "poli_id" => 2
-                ],
-                [
-                    'name' => "Dr. Sahirul Prasojo",
-                    "email" => "ryan123@gmail.com",
-                    "password" =>  Hash::make("1234567890"),
-                    "poli_id" => 2
-                ],
-                [
-                    'name' => "Dr. Radiana Rofiq",
-                    "email" => "ryan123@gmail.com",
-                    "password" =>  Hash::make("1234567890"),
-                    "poli_id" => 1
-                ],
+                
             ]
         );
     }

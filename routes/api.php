@@ -52,6 +52,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('registrations/{registration}', [RegistrationController::class, 'show']);
     Route::get('registrations-doctor-agenda/{dokter_id}', [RegistrationController::class, 'getRegistrationByDoctorAgendaById']);
     Route::get('registrations-quota', [RegistrationController::class, 'getRegistrationQuotaByHour']);
+    Route::delete('/registrations/{id}', [RegistrationController::class, 'cancel']);
+
+
 
     Route::get('healthcares', [HealthcareController::class, 'index']);
     Route::get('healthcares/{healthcare}', [HealthcareController::class, 'show']);
