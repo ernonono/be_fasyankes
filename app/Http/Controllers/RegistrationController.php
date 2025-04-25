@@ -184,7 +184,7 @@ class RegistrationController extends Controller
             ->when($end_date, function ($query) use ($end_date) {
                 return $query->whereDate('appointment_date', '<=', $end_date);
             })
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at', 'asc')
             ->get();
 
         $previousAppoinmentDate = null;
@@ -198,6 +198,7 @@ class RegistrationController extends Controller
             $registration->queue_number = $queueNumber;
             $queueNumber++;
         }
+        $registrations = $registrations->sortByDesc('created_at')->values();
 
         return response()->json($registrations, 200);
 
