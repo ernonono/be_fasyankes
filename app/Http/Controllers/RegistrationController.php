@@ -179,22 +179,21 @@ class RegistrationController extends Controller
                 });
             })
             ->when($start_date, function ($query) use ($start_date) {
-                return $query->whereDate('created_at', '>=', $start_date);
+                return $query->whereDate('appointment_date', '>=', $start_date);
             })
             ->when($end_date, function ($query) use ($end_date) {
-                return $query->whereDate('created_at', '<=', $end_date);
+                return $query->whereDate('appointment_date', '<=', $end_date);
             })
-            ->orderBy('appointment_date', 'asc')
-            ->orderBy('registry_date', 'asc')
+            ->orderBy('created_at', 'desc')
             ->get();
 
-        $previousAppointmentDate = null;
+        $previousAppoinmentDate = null;
         $queueNumber = 1;
 
         foreach ($registrations as $registration) {
-            if ($registration->appointment_date != $previousAppointmentDate) {
+            if ($registration->appointment_date != $previousAppoinmentDate) {
                 $queueNumber = 1;
-                $previousAppointmentDate = $registration->appointment_date;
+                $previousAppoinmentDate = $registration->appointment_date;
             }
             $registration->queue_number = $queueNumber;
             $queueNumber++;
