@@ -8,7 +8,9 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+
 
 class ExportRegistration implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize
 {
@@ -32,42 +34,15 @@ class ExportRegistration implements FromCollection, WithHeadings, WithStyles, Sh
         $start_date = $this->start_date;
         $end_date   = $this->end_date;
 
-        // Query untuk mendapatkan data pendaftaran sesuai dengan dokter yang ditentukan
+        //INI YG DIRUBAH PADA PROSES EXPORT EXCEL
         $registrations = Registration::with(['patient', 'doctor.poli', 'medical_records'])
-            ->where('doctor_id', $doctor_id)  // Filter berdasarkan doctor_id
-            ->where('type', 'appointment')    // Filter untuk jenis pendaftaran 'appointment'
-            ->when($start_date, function ($query) use ($start_date) {
-                return $query->whereDate('appointment_date', '>=', $start_date);  // Filter berdasarkan start_date
-            })
-            ->when($end_date, function ($query) use ($end_date) {
-                return $query->whereDate('appointment_date', '<=', $end_date);  // Filter berdasarkan end_date
-            })
-            ->orderBy('appointment_date', 'desc')  // Urutkan berdasarkan tanggal pendaftaran
+            ->where('doctor_id', $doctor_id)
+            ->where('type', 'appointment')
+
+            ->orderBy('appointment_date', 'desc')
             ->get();
 
-        // Jika tidak ada data, kembalikan collection kosong
-        if ($registrations->isEmpty()) {
-            return collect();  // Mengembalikan data kosong jika tidak ada data yang ditemukan
-        }
-
-        return $registrations->map(function ($registration, $index) {
-            // Proses rekam medis jika ada
-            $medicalRecords = $registration->medical_records->map(function ($record) {
-                $drugNames = [];
-                if (!empty($record->drug_code)) {
-                    $decoded = json_decode($record->drug_code, true);
-                    if (is_array($decoded)) {
-                        $drugNames = collect($decoded)->pluck('name')->toArray();
-                    }
-                }
-
-                return 'Diagnosa : ' . ($record->diagnosis ?? '-') . "\n" .
-                    'Gejala   : ' . ($record->symptomps ?? '-') . "\n" .
-                    'Catatan  : ' . ($record->prescription ?? '-') . "\n" .
-                    'Obat     : ' . (empty($drugNames) ? '-' : implode(', ', $drugNames)) . "\n";
-            })->implode("\n\n");
-
-            // Kembalikan data yang akan diekspor ke Excel
+        return collect($registrations)->map(function ($registration, $index) {
             return [
                 'no'               => $index + 1,
                 'patient_name'     => $registration->patient->name,
@@ -76,12 +51,26 @@ class ExportRegistration implements FromCollection, WithHeadings, WithStyles, Sh
                 'appointment_date' => $registration->appointment_date,
                 'status'           => $registration->status,
                 'description'      => $registration->description,
-                'medical_records'  => $medicalRecords,
+                'medical_records'  => $registration->medical_records->map(function ($record) {
+                    // Ambil nama-nama obat dari drug_code
+                    $drugNames = [];
+                    if (!empty($record->drug_code)) {
+                        $decoded = json_decode($record->drug_code, true);
+                        if (is_array($decoded)) {
+                            $drugNames = collect($decoded)->pluck('name')->toArray();
+                        }
+                    }
+                    return
+                        'Diagnosa : ' . ($record->diagnosis ?? '-') . "\n" .
+                        'Gejala   : ' . ($record->symptomps ?? '-') . "\n".
+                        'Catatan  : ' . ($record->prescription ?? '-') . "\n" .
+                        'Obat     : ' . (empty($drugNames) ? '-' : implode(', ', $drugNames)). "\n";
+                })->implode("\n\n"),
             ];
         });
     }
 
-    // Baris pertama sebagai header kolom di Excel
+     // Baris pertama sebagai header kolom di Excel
     public function headings(): array
     {
         return [
