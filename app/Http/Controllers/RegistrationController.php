@@ -136,6 +136,8 @@ class RegistrationController extends Controller
         $existRegistration = Registration::where('appointment_date', $request->appointment_date)
             ->where('doctor_id', $request->doctor_id)
             ->where('patient_id', $request->patient_id)
+            ->where('status', '!=', 'Dibatalkan')
+            ->where('status', '!=', 'Selesai')
             ->first();
 
         if ($existRegistration) {
