@@ -76,7 +76,7 @@ class ExportRegistration implements FromCollection, WithHeadings, WithStyles, Sh
             ];
         });
     }
-    
+
      // Baris pertama sebagai header kolom di Excel
     public function headings(): array
     {

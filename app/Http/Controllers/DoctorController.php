@@ -152,7 +152,7 @@ class DoctorController extends Controller
                 ]);
             }
 
-            return response()->json($doctor, 200); // Update the response status code to 200
+            return response()->json($doctor, 200); 
         } catch (\Exception $e) {
             return response()->json($e->getMessage(), 500);
         }
@@ -169,5 +169,5 @@ class DoctorController extends Controller
         $doctor->delete();
         return response()->json(null, 204);
     }
-    
+
 }

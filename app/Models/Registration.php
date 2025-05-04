@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Registration extends Model
 {
     use HasFactory;
-    protected $fillable = ['patient_id', 'doctor_id', 'doctor', 'registry_date', 'is_canceled', 'appointment_date', 'payment_type', 'status', 'description', 'type'];
+    protected $fillable = ['patient_id', 'doctor_id', 'doctor', 'registry_date',
+    'is_canceled', 'appointment_date', 'payment_type', 'status', 'description', 'type'
+    ];
 
     public function patient()
     {

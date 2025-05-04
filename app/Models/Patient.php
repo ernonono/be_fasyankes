@@ -9,23 +9,9 @@ class Patient extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'name',
-        'phone',
-        'gender',
-        'birth',
-        'address',
-        'religion',
-        'nik',
-        'kk',
-        'blood_type',
-        'user_id',
-        'image',
-        'status',
-        'father_name',
-        'mother_name',
-        'related_contact',
-        'bpjs'
-
+        'name', 'phone', 'gender', 'birth', 'address',
+        'religion', 'nik', 'kk', 'blood_type', 'user_id',
+        'image', 'status', 'father_name', 'mother_name', 'related_contact', 'bpjs'
     ];
 
     public function registration()
