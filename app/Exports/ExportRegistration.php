@@ -90,12 +90,17 @@ class ExportRegistration implements FromCollection, WithHeadings, WithStyles, Sh
         // Buat header bold
         $sheet->getStyle('A1:H1')->getFont()->setBold(true);
 
+
+
         // Buat header background warna kuning
         $sheet->getStyle('A1:H1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFF00');
 
         // Buat wrap text di kolom 'Rekam Medis' (kolom H)
         $highestRow = $sheet->getHighestRow();
         $sheet->getStyle('H2:H' . $highestRow)->getAlignment()->setWrapText(true);
+
+        //buat semua data baris a2 kebawah agar rata tengah vertical
+        $sheet->getStyle('A2:H' . $highestRow)->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         // Buat border semua cell
         $styleArray = [
