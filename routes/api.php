@@ -46,8 +46,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('doctors/{doctor}', [DoctorController::class, 'show']);
 
     Route::get('patients', [PatientController::class, 'index']);
-    Route::get('patients/{patient}', [PatientController::class, 'show']);
     Route::post('patients/upload-image', [PatientController::class, 'uploadImage']);
+    Route::get('patients/{patient}', [PatientController::class, 'show']);
+
 
     Route::post('registrations', [RegistrationController::class, 'store']);
     Route::get('registrations', [RegistrationController::class, 'index']);
@@ -56,8 +57,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('registrations-doctor-agenda/{dokter_id}', [RegistrationController::class, 'getRegistrationByDoctorAgendaById']);
     Route::get('registrations-quota', [RegistrationController::class, 'getRegistrationQuotaByHour']);
     Route::delete('/registrations/{id}', [RegistrationController::class, 'cancel']);
-
-
 
     Route::get('healthcares', [HealthcareController::class, 'index']);
     Route::get('healthcares/{healthcare}', [HealthcareController::class, 'show']);
@@ -97,7 +96,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::put('doctors/{doctor}', [DoctorController::class, 'update']);
     Route::post('doctors/upload-image', [DoctorController::class, 'uploadImage']);
 
-    Route::apiResource('patients', PatientController::class, ['except' => ['update']]);
+    Route::apiResource('patients', PatientController::class, ['except' => ['update', 'show']]);
     Route::put('patients/{patient}', [PatientController::class, 'update']);
 
     Route::get('medical-records/registration/{registration_id}', [MedicalRecordController::class, 'getMedicalRecordByRegistration']);

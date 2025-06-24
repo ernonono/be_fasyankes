@@ -9,9 +9,14 @@ use Illuminate\Http\Request;
 
 class MedicalRecordController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(MedicalRecord::all(), 200);
+        $patientId = $request->query('patient_id');
+        $medicalRecords = MedicalRecord::when($patientId, function ($query) use ($patientId) {
+            return $query->where('patient_id', $patientId);
+        })->orderBy('created_at', 'desc')->get();
+
+        return response()->json($medicalRecords, 200);
     }
 
     public function store(Request $request)
