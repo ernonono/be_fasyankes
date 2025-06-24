@@ -79,7 +79,6 @@ class RegistrationController extends Controller
     {
         $user = $request->user();
         $reg  = Registration::where('id', $id)
-            ->where('patient_id', $user->patient_id)
             ->where('status', 'Belum Selesai')
             ->first();
 
@@ -133,25 +132,25 @@ class RegistrationController extends Controller
 
 
     public function store(Request $request)
-{
-    $dateOnly = Carbon::parse($request->appointment_date)->toDateString();
+    {
+        $dateOnly = Carbon::parse($request->appointment_date)->toDateString();
 
-    // Validasi apakah pasien sudah punya janji di tanggal tersebut (dengan dokter manapun)
-    $existRegistration = Registration::whereDate('appointment_date', $dateOnly)
-        ->where('patient_id', $request->patient_id)
-        ->whereNotIn('status', ['Dibatalkan', 'Selesai'])
-        ->first();
+        // Validasi apakah pasien sudah punya janji di tanggal tersebut (dengan dokter manapun)
+        $existRegistration = Registration::whereDate('appointment_date', $dateOnly)
+            ->where('patient_id', $request->patient_id)
+            ->whereNotIn('status', ['Dibatalkan', 'Selesai'])
+            ->first();
 
-    if ($existRegistration) {
-        return response()->json([
-            'error' => true,
-            'error_message' => 'Kamu sudah mempunyai janji pada tanggal tersebut, hanya diperbolehkan satu janji per hari.'
-        ], 400);
+        if ($existRegistration) {
+            return response()->json([
+                'error' => true,
+                'error_message' => 'Kamu sudah mempunyai janji pada tanggal tersebut, hanya diperbolehkan satu janji per hari.'
+            ], 400);
+        }
+
+        $registration = Registration::create($request->all());
+        return response()->json($registration, 201);
     }
-
-    $registration = Registration::create($request->all());
-    return response()->json($registration, 201);
-}
 
     public function show(Registration $registration)
     {
