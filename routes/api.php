@@ -9,6 +9,7 @@ use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HealthcareController;
+use App\Http\Controllers\PDFExportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +28,8 @@ Route::post('login', [AuthController::class, 'login']);
 
 Route::post('send-reset-password', [AuthController::class, 'sendEmailResetPassword']);
 Route::post('reset-password', [AuthController::class, 'resetPassword']);
+Route::get('/export-pdf/{id}', [PDFExportController::class, 'exportPdf']);
+
 
 // middleware untuk cek apakah user sudah login atau belum
 Route::middleware(['auth:sanctum'])->group(function () {

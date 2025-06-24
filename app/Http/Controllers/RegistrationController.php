@@ -7,6 +7,7 @@ use App\Models\Doctor;
 use App\Models\Registration;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Carbon;
 
 class RegistrationController extends Controller
 {
@@ -132,20 +133,25 @@ class RegistrationController extends Controller
 
 
     public function store(Request $request)
-    {
-        $existRegistration = Registration::where('appointment_date', $request->appointment_date)
-            ->where('doctor_id', $request->doctor_id)
-            ->where('patient_id', $request->patient_id)
-            ->where('status', '!=', 'Dibatalkan')
-            ->where('status', '!=', 'Selesai')
-            ->first();
+{
+    $dateOnly = Carbon::parse($request->appointment_date)->toDateString();
 
-        if ($existRegistration) {
-            return response()->json(['error' => true, 'error_message' => 'You already have appointment at this date with the same doctor'], 400);
-        }
-        $registration = Registration::create($request->all());
-        return response()->json($registration, 201);
+    // Validasi apakah pasien sudah punya janji di tanggal tersebut (dengan dokter manapun)
+    $existRegistration = Registration::whereDate('appointment_date', $dateOnly)
+        ->where('patient_id', $request->patient_id)
+        ->whereNotIn('status', ['Dibatalkan', 'Selesai'])
+        ->first();
+
+    if ($existRegistration) {
+        return response()->json([
+            'error' => true,
+            'error_message' => 'Kamu sudah mempunyai janji pada tanggal tersebut, hanya diperbolehkan satu janji per hari.'
+        ], 400);
     }
+
+    $registration = Registration::create($request->all());
+    return response()->json($registration, 201);
+}
 
     public function show(Registration $registration)
     {
