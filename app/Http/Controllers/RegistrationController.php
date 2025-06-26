@@ -8,6 +8,7 @@ use App\Models\Registration;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Carbon;
+use App\Exports\DoctorScheduleExport;
 
 class RegistrationController extends Controller
 {
@@ -272,4 +273,12 @@ class RegistrationController extends Controller
             15 => $quota_15,
         ], 200);
     }
+
+    public function exportDoctorSchedule(Request $request)
+{
+    $start = $request->input('start_date');
+    $end = $request->input('end_date');
+
+    return Excel::download(new DoctorScheduleExport($start, $end), 'jadwal_dokter.xlsx');
+}
 }

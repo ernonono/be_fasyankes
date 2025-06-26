@@ -109,4 +109,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::put('healthcares/{healthcare}', [HealthcareController::class, 'update']);
     Route::delete('healthcares/{healthcare}', [HealthcareController::class, 'destroy']);
     Route::post('healthcares/upload-video', [HealthcareController::class, 'uploadVideo']);
+    Route::get('/registrations-summary-schedule', [RegistrationController::class, 'exportDoctorSchedule']);
+
 });
