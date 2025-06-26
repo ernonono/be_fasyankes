@@ -3,44 +3,67 @@
 namespace App\Exports;
 
 use App\Models\Registration;
+use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class DoctorScheduleExport implements FromCollection, WithHeadings
+class DoctorScheduleExport implements FromCollection, WithHeadings, WithStyles, WithColumnWidths
 {
     protected $startDate;
     protected $endDate;
 
     public function __construct($startDate, $endDate)
     {
-        $this->startDate = $startDate . ' 00:00:00';
-        $this->endDate = $endDate . ' 23:59:59';
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
     }
 
     public function collection()
-{
-    return Registration::with(['doctor.user', 'doctor.poli', 'patient'])
-        ->whereBetween('appointment_date', [
-            $this->startDate, // ✅ ini yang benar
-            $this->endDate,   // ✅ ini yang benar
-        ])
-        ->get()
-        ->map(function ($item, $index) {
-            return [
-                'No'               => $index + 1,
-                'Pasien'           => $item->patient->name ?? '-',
-                'Dokter'           => $item->doctor->user->name ?? '-',
-                'Poli'             => $item->doctor->poli->name ?? '-',
-                'Tanggal Daftar'   => \Carbon\Carbon::parse($item->appointment_date)->format('Y-m-d H:i'),
-                'Status'           => $item->status ?? '-',
-            ];
-        });
-}
-
+    {
+        return Registration::with(['doctor.user', 'doctor.poli', 'patient'])
+            ->where('type', 'appointment')
+            ->whereDate('appointment_date', '>=', $this->startDate)
+            ->whereDate('appointment_date', '<=', $this->endDate)
+            ->get()
+            ->map(function ($item, $index) {
+                return [
+                    'No'      => $index + 1,
+                    'Pasien'  => optional($item->patient)->name ?? '-',
+                    'Dokter'  => optional($item->doctor->user)->name ?? '-',
+                    'Poli'    => optional($item->doctor->poli)->name ?? '-',
+                    'Tanggal' => Carbon::parse($item->appointment_date)->format('Y-m-d'),
+                    'Status'  => $item->status,
+                ];
+            });
+    }
 
     public function headings(): array
     {
-        return ['No', 'Pasien', 'Dokter', 'Poli', 'Tanggal Daftar', 'Status'];
+        return ['No', 'Pasien', 'Dokter', 'Poli', 'Tanggal', 'Status'];
+    }
+
+    // Bold untuk header
+    public function styles(Worksheet $sheet)
+    {
+        return [
+            1 => ['font' => ['bold' => true]],
+        ];
+    }
+
+    // Atur lebar kolom manual (opsional)
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 5,   // No
+            'B' => 25,  // Pasien
+            'C' => 25,  // Dokter
+            'D' => 20,  // Poli
+            'E' => 18,  // Tanggal
+            'F' => 15,  // Status
+        ];
     }
 }
