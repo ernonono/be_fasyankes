@@ -26,22 +26,45 @@ class RegistrationController extends Controller
         $user = $request->user();
 
         if ($user->role == 'patient') {
-            $registrationsBelumSelesai = Registration::with(['patient.user', 'doctor.poli', 'medical_records'])
+            // Ambil semua registrasi pasien, diurutkan untuk perhitungan queue_number
+            // Urutkan berdasarkan appointment_date ASC, lalu created_at ASC untuk memastikan urutan antrian yang benar
+            $allPatientRegistrations = Registration::with(['patient.user', 'doctor.poli', 'medical_records'])
                 ->where('patient_id', $user->patient_id)
-                ->where('status', 'Belum Selesai')
-                ->orderBy('created_at', 'desc')
+                ->orderBy('appointment_date', 'asc') // Urutan penting untuk perhitungan antrian harian
+                ->orderBy('created_at', 'asc')
                 ->get();
-            $registrationsSelesai = Registration::with(['patient.user', 'doctor.poli', 'medical_records'])
-                ->where('patient_id', $user->patient_id)
-                ->where('status', 'Selesai')
-                ->orderBy('created_at', 'desc')
-                ->get();
-            $registrationsDibatalkan = Registration::with(['patient.user', 'doctor.poli', 'medical_records'])
-                ->where('patient_id', $user->patient_id)
-                ->where('status', 'Dibatalkan')
-                ->orderBy('created_at', 'desc')
-                ->get();
-            return response()->json(['selesai' => $registrationsSelesai, 'belum_selesai' => $registrationsBelumSelesai, 'dibatalkan' => $registrationsDibatalkan], 200);
+
+            $previousAppointmentDate = null;
+            $queueNumber = 1;
+
+            // Hitung dan tambahkan queue_number ke setiap registrasi
+            foreach ($allPatientRegistrations as $registration) {
+                if ($registration->appointment_date != $previousAppointmentDate) {
+                    $queueNumber = 1; // Reset nomor antrian untuk tanggal yang berbeda
+                    $previousAppointmentDate = $registration->appointment_date;
+                }
+                $registration->queue_number = $queueNumber;
+                $queueNumber++;
+            }
+
+            // Sekarang pisahkan registrasi berdasarkan status dan urutkan kembali untuk tampilan riwayat (terbaru dulu)
+            $registrationsBelumSelesai = $allPatientRegistrations->where('status', 'Belum Selesai')
+                ->sortByDesc('created_at') // Urutkan sesuai kebutuhan di Riwayat.jsx
+                ->values(); // Reset keys
+
+            $registrationsSelesai = $allPatientRegistrations->where('status', 'Selesai')
+                ->sortByDesc('created_at')
+                ->values();
+
+            $registrationsDibatalkan = $allPatientRegistrations->where('status', 'Dibatalkan')
+                ->sortByDesc('created_at')
+                ->values();
+
+            return response()->json([
+                'selesai' => $registrationsSelesai,
+                'belum_selesai' => $registrationsBelumSelesai,
+                'dibatalkan' => $registrationsDibatalkan
+            ], 200);
         }
 
 
@@ -71,6 +94,20 @@ class RegistrationController extends Controller
             // sort by appointment date
             ->orderBy('created_at', 'asc')
             ->get();
+
+        // Logika perhitungan queue_number untuk role selain patient (admin/dokter)
+        $previousAppoinmentDate = null;
+        $queueNumber = 1;
+
+        foreach ($registrations as $registration) {
+            if ($registration->appointment_date != $previousAppoinmentDate) {
+                $queueNumber = 1;
+                $previousAppoinmentDate = $registration->appointment_date;
+            }
+            $registration->queue_number = $queueNumber;
+            $queueNumber++;
+        }
+        $registrations = $registrations->sortByDesc('created_at')->values();
 
         return response()->json($registrations, 200);
     }
@@ -210,7 +247,8 @@ class RegistrationController extends Controller
 
         return response()->json($registrations, 200);
 
-        return response()->json($registrations, 200);
+        // Baris return kedua ini redundan dan tidak akan pernah dieksekusi.
+        // return response()->json($registrations, 200);
     }
     public function getRegistrationByDoctorAgenda(Request $request)
     {
@@ -275,10 +313,10 @@ class RegistrationController extends Controller
     }
 
     public function exportDoctorSchedule(Request $request)
-{
-    $start = $request->input('start_date');
-    $end = $request->input('end_date');
+    {
+        $start = $request->input('start_date');
+        $end = $request->input('end_date');
 
-    return Excel::download(new DoctorScheduleExport($start, $end), 'jadwal_dokter.xlsx');
-}
+        return Excel::download(new DoctorScheduleExport($start, $end), 'jadwal_dokter.xlsx');
+    }
 }
