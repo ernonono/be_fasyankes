@@ -25,8 +25,8 @@ class DoctorController extends Controller
         $specialty = $request->query('specialty');
 
         $dokters = Doctor::when($poli_id, function ($query, $poli_id) {
-                return $query->where('poli_id', '=', $poli_id);
-            })
+            return $query->where('poli_id', '=', $poli_id);
+        })
             ->when($name, function ($query, $name) {
                 return $query->where('name', 'like', "%$name%");
             })
@@ -75,6 +75,7 @@ class DoctorController extends Controller
                 'surat_izin' => 'nullable|file|mimes:pdf,jpeg,jpg,png|max:5120', // Max 5MB
                 'poli_id' => 'required|exists:polis,id',
                 'about' => 'nullable|string',
+                'quota' => 'nullable|integer|min:0',
                 'profession' => 'nullable|string|max:255',
                 'specialty' => 'nullable|string|max:255',
                 'specialty_description' => 'nullable|string',
@@ -152,7 +153,6 @@ class DoctorController extends Controller
 
             // Mengembalikan respons sukses ke frontend
             return response()->json($doctor, 201);
-
         } catch (ValidationException $e) {
             DB::rollBack();
             // Hapus file yang mungkin sudah terupload jika ada error validasi
@@ -245,6 +245,7 @@ class DoctorController extends Controller
                 'surat_izin' => 'nullable|file|mimes:pdf,jpeg,jpg,png|max:5120', // Max 5MB
                 'poli_id' => 'required|exists:polis,id',
                 'about' => 'nullable|string',
+                'quota' => 'nullable|integer|min:0',
                 'profession' => 'nullable|string|max:255',
                 'specialty' => 'nullable|string|max:255',
                 'specialty_description' => 'nullable|string',
@@ -284,7 +285,7 @@ class DoctorController extends Controller
             } else {
                 // Jika tidak ada file baru dan tidak ada sinyal untuk menghapus, pertahankan yang lama
                 if (!isset($validatedData['image'])) {
-                     $validatedData['image'] = $doctor->image;
+                    $validatedData['image'] = $doctor->image;
                 }
             }
 
