@@ -29,7 +29,6 @@ class RegistrationController extends Controller
             // Ambil semua registrasi pasien, diurutkan untuk perhitungan queue_number
             // Urutkan berdasarkan appointment_date ASC, lalu created_at ASC untuk memastikan urutan antrian yang benar
             $allPatientRegistrations = Registration::with(['patient.user', 'doctor.poli', 'medical_records'])
-                ->where('patient_id', $user->patient_id)
                 ->orderBy('appointment_date', 'asc') // Urutan penting untuk perhitungan antrian harian
                 ->orderBy('created_at', 'asc')
                 ->get();
@@ -47,16 +46,18 @@ class RegistrationController extends Controller
                 $queueNumber++;
             }
 
+            $loggedInPatientRegistrations = $allPatientRegistrations->where('patient_id', $user->patient_id);
+
             // Sekarang pisahkan registrasi berdasarkan status dan urutkan kembali untuk tampilan riwayat (terbaru dulu)
-            $registrationsBelumSelesai = $allPatientRegistrations->where('status', 'Belum Selesai')
+            $registrationsBelumSelesai = $loggedInPatientRegistrations->where('status', 'Belum Selesai')
                 ->sortByDesc('created_at') // Urutkan sesuai kebutuhan di Riwayat.jsx
                 ->values(); // Reset keys
 
-            $registrationsSelesai = $allPatientRegistrations->where('status', 'Selesai')
+            $registrationsSelesai = $loggedInPatientRegistrations->where('status', 'Selesai')
                 ->sortByDesc('created_at')
                 ->values();
 
-            $registrationsDibatalkan = $allPatientRegistrations->where('status', 'Dibatalkan')
+            $registrationsDibatalkan = $loggedInPatientRegistrations->where('status', 'Dibatalkan')
                 ->sortByDesc('created_at')
                 ->values();
 
