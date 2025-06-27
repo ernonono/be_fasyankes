@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class Doctor extends Model
 {
     use HasFactory;
-    protected $fillable = ['poli_id', 'quota', 'specialty_description', 'name', 'user_id', 'specialty', 'about', 'education', 'actions', 'image', 'nik', 'birthdate', 'gender', 'address', 'phone_number', 'hospital_code', 'profession','unique_number', 'facebook_link', 'twitter_link', 'google_plus_link', 'linkedin_link'];
+    protected $fillable = ['poli_id', 'quota', 'specialty_description', 'name', 'user_id', 'specialty', 'about', 'education', 'actions', 'image', 'nik', 'birthdate', 'gender', 'address', 'phone_number', 'hospital_code', 'profession','unique_number', 'facebook_link', 'twitter_link', 'google_plus_link', 'linkedin_link', 'surat_izin'];
 
     public function poli()
     {
