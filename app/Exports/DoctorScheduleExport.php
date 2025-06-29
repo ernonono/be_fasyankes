@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\Registration;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -24,12 +25,23 @@ class DoctorScheduleExport implements FromCollection, WithHeadings, WithStyles, 
 
     public function collection()
     {
-        return Registration::with(['doctor.user', 'doctor.poli', 'patient'])
+        return Registration::with(['doctor.user', 'doctor.poli', 'patient', 'medical_records'])
             ->where('type', 'appointment')
             ->whereDate('appointment_date', '>=', $this->startDate)
             ->whereDate('appointment_date', '<=', $this->endDate)
             ->get()
             ->map(function ($item, $index) {
+                $medicalRecordNumbers = '';
+
+                // Cek apakah ada rekam medis terkait dan looping untuk mengambil rm_number
+                $medicalRecordNumbers = '';
+                if ($item->medical_records->isNotEmpty()) { // Membutuhkan relasi medical_records di model Registration
+                    $medicalRecordNumbers = $item->medical_records->map(function ($medicalRecord) {
+                        return $medicalRecord->rm_number; // Membutuhkan kolom 'rm_number' di tabel medical_records
+                    })->implode(', ');
+                } else {
+                    $medicalRecordNumbers = '-';
+                }
                 return [
                     'No'      => $index + 1,
                     'Pasien'  => optional($item->patient)->name ?? '-',
@@ -37,13 +49,14 @@ class DoctorScheduleExport implements FromCollection, WithHeadings, WithStyles, 
                     'Poli'    => optional($item->doctor->poli)->name ?? '-',
                     'Tanggal' => Carbon::parse($item->appointment_date)->format('Y-m-d'),
                     'Status'  => $item->status,
+                    'Nomor Rekam Medis' => $medicalRecordNumbers,
                 ];
             });
     }
 
     public function headings(): array
     {
-        return ['No', 'Pasien', 'Dokter', 'Poli', 'Tanggal', 'Status'];
+        return ['No', 'Pasien', 'Dokter', 'Poli', 'Tanggal', 'Status', 'Nomor Rekam Medis'];
     }
 
     // Bold untuk header
@@ -64,6 +77,7 @@ class DoctorScheduleExport implements FromCollection, WithHeadings, WithStyles, 
             'D' => 20,  // Poli
             'E' => 18,  // Tanggal
             'F' => 15,  // Status
+            'G' => 30,  // Nomor Rekam Medis
         ];
     }
 }
